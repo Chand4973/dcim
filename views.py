@@ -3787,7 +3787,6 @@ from django.views.decorators.csrf import csrf_exempt
 import subprocess
 import json
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def ping_oob_ip(request):
     """

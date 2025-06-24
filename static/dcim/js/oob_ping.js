@@ -67,13 +67,20 @@ function pingOobIP(button) {
 }
 
 function getCSRFToken() {
-  // Get CSRF token from meta tag or cookie
-  const token = document.querySelector('meta[name="csrf-token"]');
-  if (token) {
-    return token.getAttribute("content");
+  // Try multiple methods to get CSRF token
+  // Method 1: Django's standard csrf token input (most common in NetBox)
+  const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+  if (csrfInput) {
+    return csrfInput.value;
   }
 
-  // Fallback to cookie method
+  // Method 2: Meta tag
+  const metaToken = document.querySelector('meta[name="csrf-token"]');
+  if (metaToken) {
+    return metaToken.getAttribute("content");
+  }
+
+  // Method 3: Cookie method
   const cookies = document.cookie.split(";");
   for (let cookie of cookies) {
     const [name, value] = cookie.trim().split("=");
@@ -82,6 +89,13 @@ function getCSRFToken() {
     }
   }
 
+  // Method 4: Try to find any element with csrf data
+  const csrfElement = document.querySelector("[data-csrf-token]");
+  if (csrfElement) {
+    return csrfElement.getAttribute("data-csrf-token");
+  }
+
+  console.warn("CSRF token not found");
   return "";
 }
 
