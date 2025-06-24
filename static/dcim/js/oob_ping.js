@@ -18,11 +18,13 @@ function pingOobIP(button) {
   resultSpan.style.display = "none";
 
   // Make AJAX request to ping endpoint
+  const csrfToken = getCSRFToken();
+
   fetch("/dcim/ping-oob-ip/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": getCSRFToken(),
+      "X-CSRFToken": csrfToken,
     },
     body: JSON.stringify({ ip: ip }),
   })
