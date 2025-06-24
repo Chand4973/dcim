@@ -277,6 +277,18 @@ class DeviceTable(TenancyColumnsMixin, ContactsColumnMixin, NetBoxTable):
             )
         return "—"
 
+    def render_oob_ip_ping_status(self, record):
+        ip = record.oob_ip.address if record.oob_ip else None
+        if ip:
+            clean_ip = str(ip).split('/')[0]
+            return format_html(
+                '<button class="btn btn-sm btn-outline-primary oob-ping-btn" data-ip="{}" onclick="pingOobIP(this)">'
+                'Ping</button>'
+                '<span class="oob-ping-result ms-2" style="display:none;"></span>',
+                clean_ip
+            )
+        return "—"
+
     class Meta(NetBoxTable.Meta):
         model = models.Device
         fields = (
