@@ -199,6 +199,11 @@ class DeviceTable(TenancyColumnsMixin, ContactsColumnMixin, NetBoxTable):
         linkify=True,
         verbose_name='OOB IP'
     )
+    oob_ip_ping_status = tables.Column(
+        empty_values=(),
+        verbose_name=_('OOB IP Ping Status'),
+        orderable=False
+    )
     cluster = tables.Column(
         verbose_name=_('Cluster'),
         linkify=True
