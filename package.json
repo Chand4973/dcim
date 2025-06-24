@@ -4,7 +4,7 @@
   "description": "NetBox DCIM Django app with frontend components",
   "main": "index.js",
   "scripts": {
-    "dev": "echo 'NetBox DCIM app - Frontend development mode'",
+    "dev": "npx http-server . -p 3000 -c-1 --cors",
     "build": "echo 'NetBox DCIM app - Build complete'",
     "start": "echo 'NetBox DCIM app - Ready'",
     "test": "echo 'NetBox DCIM app - No frontend tests configured'"
