@@ -3775,3 +3775,51 @@ class VirtualDeviceContextBulkDeleteView(generic.BulkDeleteView):
     queryset = VirtualDeviceContext.objects.all()
     filterset = filtersets.VirtualDeviceContextFilterSet
     table = tables.VirtualDeviceContextTable
+
+
+#
+# OOB IP Ping
+#
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+import subprocess
+import json
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def ping_oob_ip(request):
+    """
+    AJAX view to ping an OOB IP address and return the result
+    """
+    try:
+        data = json.loads(request.body)
+        ip_address = data.get('ip')
+
+        if not ip_address:
+            return JsonResponse({'status': 'error', 'message': 'No IP address provided'})
+
+        # Perform ping with timeout
+        try:
+            result = subprocess.run(
+                ['ping', '-c', '1', '-W', '3', ip_address],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+
+            if result.returncode == 0:
+                return JsonResponse({'status': 'online'})
+            else:
+                return JsonResponse({'status': 'offline'})
+
+        except subprocess.TimeoutExpired:
+            return JsonResponse({'status': 'offline'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})

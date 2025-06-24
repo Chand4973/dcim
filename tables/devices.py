@@ -1,4 +1,5 @@
 import django_tables2 as tables
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django_tables2.utils import Accessor
 
@@ -198,6 +199,11 @@ class DeviceTable(TenancyColumnsMixin, ContactsColumnMixin, NetBoxTable):
         linkify=True,
         verbose_name='OOB IP'
     )
+    oob_ip_ping_status = tables.Column(
+        empty_values=(),
+        verbose_name=_('OOB IP Ping Status'),
+        orderable=False
+    )
     cluster = tables.Column(
         verbose_name=_('Cluster'),
         linkify=True
@@ -271,13 +277,25 @@ class DeviceTable(TenancyColumnsMixin, ContactsColumnMixin, NetBoxTable):
             )
         return "—"
 
+    def render_oob_ip_ping_status(self, record):
+        ip = record.oob_ip.address if record.oob_ip else None
+        if ip:
+            clean_ip = str(ip).split('/')[0]
+            return format_html(
+                '<button class="btn btn-sm btn-outline-primary oob-ping-btn" data-ip="{}" onclick="pingOobIP(this)">'
+                'Ping</button>'
+                '<span class="oob-ping-result ms-2" style="display:none;"></span>',
+                clean_ip
+            )
+        return "—"
+
     class Meta(NetBoxTable.Meta):
         model = models.Device
         fields = (
             'pk', 'id', 'name', 'status', 'tenant', 'tenant_group', 'role', 'manufacturer', 'device_type',
             'serial', 'asset_tag', 'region', 'site_group', 'site', 'location', 'rack', 'parent_device',
             'device_bay_position', 'position', 'face', 'latitude', 'longitude', 'airflow', 'primary_ip', 'primary_ip4',
-            'primary_ip6', 'oob_ip', 'cluster', 'virtual_chassis', 'vc_position', 'vc_priority', 'description',
+            'primary_ip6', 'oob_ip', 'oob_ip_ping_status', 'cluster', 'virtual_chassis', 'vc_position', 'vc_priority', 'description',
             'config_template', 'comments', 'contacts', 'tags', 'created', 'last_updated',
         )
         default_columns = (
