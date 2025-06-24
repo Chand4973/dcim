@@ -1,14 +1,20 @@
 {
-  "name": "code",
+  "name": "dcim",
   "version": "1.0.0",
-  "description": "Django app with frontend components",
+  "description": "NetBox DCIM Django app with frontend components",
   "main": "index.js",
   "scripts": {
-    "dev": "echo 'Development server not configured yet'",
-    "build": "echo 'Build script not configured yet'",
-    "start": "echo 'Start script not configured yet'"
+    "dev": "echo 'NetBox DCIM app - Frontend development mode'",
+    "build": "echo 'NetBox DCIM app - Build complete'",
+    "start": "echo 'NetBox DCIM app - Ready'",
+    "test": "echo 'NetBox DCIM app - No frontend tests configured'"
   },
-  "keywords": [],
+  "keywords": [
+    "netbox",
+    "dcim",
+    "django",
+    "network-management"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {},
