@@ -360,4 +360,7 @@ urlpatterns = [
     path('power-feeds/delete/', views.PowerFeedBulkDeleteView.as_view(), name='powerfeed_bulk_delete'),
     path('power-feeds/<int:pk>/', include(get_model_urls('dcim', 'powerfeed'))),
 
+    # OOB IP Ping
+    path('ping-oob-ip/', views.ping_oob_ip, name='ping_oob_ip'),
+
 ]
