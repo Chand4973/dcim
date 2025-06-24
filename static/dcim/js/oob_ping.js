@@ -6,6 +6,8 @@ function pingOobIP(button) {
   const ip = button.getAttribute("data-ip");
   const resultSpan = button.nextElementSibling;
 
+  console.log("pingOobIP called with IP:", ip);
+
   if (!ip) {
     console.error("No IP address found");
     return;
@@ -18,15 +20,25 @@ function pingOobIP(button) {
   resultSpan.style.display = "none";
 
   // Make AJAX request to ping endpoint
+  const csrfToken = getCSRFToken();
+  console.log("Making ping request to:", "/dcim/ping-oob-ip/");
+  console.log("CSRF token:", csrfToken ? "found" : "not found");
+
   fetch("/dcim/ping-oob-ip/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": getCSRFToken(),
+      "X-CSRFToken": csrfToken,
     },
     body: JSON.stringify({ ip: ip }),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      console.log("Response status:", response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
       // Hide button and show result
       button.style.display = "none";
@@ -50,30 +62,38 @@ function pingOobIP(button) {
     })
     .catch((error) => {
       console.error("Ping request failed:", error);
+      console.error("Error details:", error.message);
 
       // Reset button state
       button.disabled = false;
       button.innerHTML = "Ping";
 
-      // Show error result
+      // Show error result with more detail
       resultSpan.style.display = "inline";
-      resultSpan.innerHTML = '<span class="badge bg-danger">Error</span>';
+      resultSpan.innerHTML = `<span class="badge bg-danger" title="${error.message}">Error</span>`;
 
-      // Hide error after 3 seconds
+      // Hide error after 5 seconds
       setTimeout(() => {
         resultSpan.style.display = "none";
-      }, 3000);
+      }, 5000);
     });
 }
 
 function getCSRFToken() {
-  // Get CSRF token from meta tag or cookie
-  const token = document.querySelector('meta[name="csrf-token"]');
-  if (token) {
-    return token.getAttribute("content");
+  // Try multiple methods to get CSRF token
+  // Method 1: Django's standard csrf token input (most common in NetBox)
+  const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+  if (csrfInput) {
+    return csrfInput.value;
   }
 
-  // Fallback to cookie method
+  // Method 2: Meta tag
+  const metaToken = document.querySelector('meta[name="csrf-token"]');
+  if (metaToken) {
+    return metaToken.getAttribute("content");
+  }
+
+  // Method 3: Cookie method
   const cookies = document.cookie.split(";");
   for (let cookie of cookies) {
     const [name, value] = cookie.trim().split("=");
@@ -82,6 +102,13 @@ function getCSRFToken() {
     }
   }
 
+  // Method 4: Try to find any element with csrf data
+  const csrfElement = document.querySelector("[data-csrf-token]");
+  if (csrfElement) {
+    return csrfElement.getAttribute("data-csrf-token");
+  }
+
+  console.warn("CSRF token not found");
   return "";
 }
 

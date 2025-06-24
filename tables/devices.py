@@ -2,6 +2,7 @@ import django_tables2 as tables
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django_tables2.utils import Accessor
+from django_tables2 import Column
 
 from dcim import models
 from netbox.tables import NetBoxTable, columns
@@ -266,17 +267,6 @@ class DeviceTable(TenancyColumnsMixin, ContactsColumnMixin, NetBoxTable):
     inventory_item_count = tables.Column(
         verbose_name=_('Inventory items')
     )
-    ping_status = Column(empty_values=(), verbose_name='Ping Status')
-
-    def render_ping_status(self, record):
-        ip = record.primary_ip.address if record.primary_ip else None
-        if ip:
-            clean_ip = str(ip).split('/')[0]
-            return format_html(
-                '<span class="ping-status" data-ip="{}">Checking...</span>', clean_ip
-            )
-        return "—"
-
     def render_oob_ip_ping_status(self, record):
         ip = record.oob_ip.address if record.oob_ip else None
         if ip:
