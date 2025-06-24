@@ -6,6 +6,8 @@ function pingOobIP(button) {
   const ip = button.getAttribute("data-ip");
   const resultSpan = button.nextElementSibling;
 
+  console.log("pingOobIP called with IP:", ip);
+
   if (!ip) {
     console.error("No IP address found");
     return;
@@ -19,6 +21,8 @@ function pingOobIP(button) {
 
   // Make AJAX request to ping endpoint
   const csrfToken = getCSRFToken();
+  console.log("Making ping request to:", "/dcim/ping-oob-ip/");
+  console.log("CSRF token:", csrfToken ? "found" : "not found");
 
   fetch("/dcim/ping-oob-ip/", {
     method: "POST",
@@ -28,7 +32,13 @@ function pingOobIP(button) {
     },
     body: JSON.stringify({ ip: ip }),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      console.log("Response status:", response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
       // Hide button and show result
       button.style.display = "none";
@@ -52,19 +62,20 @@ function pingOobIP(button) {
     })
     .catch((error) => {
       console.error("Ping request failed:", error);
+      console.error("Error details:", error.message);
 
       // Reset button state
       button.disabled = false;
       button.innerHTML = "Ping";
 
-      // Show error result
+      // Show error result with more detail
       resultSpan.style.display = "inline";
-      resultSpan.innerHTML = '<span class="badge bg-danger">Error</span>';
+      resultSpan.innerHTML = `<span class="badge bg-danger" title="${error.message}">Error</span>`;
 
-      // Hide error after 3 seconds
+      // Hide error after 5 seconds
       setTimeout(() => {
         resultSpan.style.display = "none";
-      }, 3000);
+      }, 5000);
     });
 }
 
